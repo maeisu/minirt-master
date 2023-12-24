@@ -68,7 +68,7 @@ int main()
 
   //↓球体の設定
   // 視点座標
-  double Pv[3] = {0.0, 0.0, -6000.0};
+  double Pv[3] = {0.0, 0.0, -4000.0};
   // 中心座標
   double Pc[2][3] = {{-50.0, -50.0, -1000.0},
                     {-200.0, -200.0, -1700.0}};
@@ -80,7 +80,7 @@ int main()
 
   double A, B2, C, D;
 
-  double PL[3] = {20000,20000, -20000}; // 光源座標
+  double PL[3] = {10000, 10000, -20000}; // 光源座標
   double P[3], N[3], vL[3], vR[3];
   double cosA;
   double t0;
@@ -128,28 +128,27 @@ int main()
           // cosA < 0 のときはPは球自身の影にあるので黒色にする
           cosA = -InnerProduct(vL, N);
           cosA /= sqrt(InnerProduct(vL, vL) * InnerProduct(N, N));
-          w = -(InnerProduct(vL, N)/InnerProduct(N, N));
-          for(k=0; k<3; k++) vR[k] = 2*w*N[k]+vL[k];
-          cosG = -InnerProduct(vR, v)/sqrt(InnerProduct(vR, vR)*InnerProduct(v,v));
-          if(cosG < 0) cosG = 0;
-            cosG = pow(cosG, 10); //10は鏡面度（10~20)
-          for(k=0; k<3; k++)
-          {
-            color[k] = RGB[s0][k]*Kd*cosA; //拡散反射
-            if(color[k] < l*Ks*cosG) color[k] = l*Ks*cosG;//鏡面反射は白色
-            if(color[k] < RGB[s0][k]*le) color[k] = RGB[s0][k]*le; //le 環境光
-          }
-          color_h = argb_to_hex(0, color);
+          if (cosA > 0 || s == s0 ) {
+            w = -(InnerProduct(vL, N)/InnerProduct(N, N));
+            for(k=0; k<3; k++) vR[k] = 2*w*N[k]+vL[k];
+            cosG = -InnerProduct(vR, v)/sqrt(InnerProduct(vR, vR)*InnerProduct(v,v));
+            if(cosG < 0) cosG = 0;
+              cosG = pow(cosG, 10); //10は鏡面度（10~20)
+            for(k=0; k<3; k++)
+            {
+              color[k] = RGB[s0][k]*Kd*cosA; //拡散反射
+              if(color[k] < l*Ks*cosG) color[k] = l*Ks*cosG;//鏡面反射は白色
+              if(color[k] < RGB[s0][k]*le) color[k] = RGB[s0][k]*le; //le 環境光
+            }
+            color_h = argb_to_hex(0, color);
           my_mlx_pixel_put(&img, i + WIDTH/2, j + HEIGHT/2, color_h);
+          }
         }
         else{ //背景
           color_h = argb_to_hex(0, RGB_back);
           my_mlx_pixel_put(&img, i+ WIDTH/2, j+ HEIGHT/2, color_h);
         }
       }
-
-
-      
     }
   }
   mlx_put_image_to_window(data.mlx, data.mlx_win, img.img, 0, 0);
